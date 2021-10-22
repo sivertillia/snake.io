@@ -5,5 +5,6 @@ export const onConnect = async (socket) => {
   const services = service(socket)
   await onConnectGame(socket)
   socket.on('game:start', services.startGame)
+  socket.on('game:move', services.initMove)
   socket.on('disconnecting', services.onDisconnect)
 }

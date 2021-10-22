@@ -4,7 +4,9 @@ const initialState = {
   snake: {
     position: [],
     speed: null,
-  }
+    theme: {},
+    username: '',
+  },
 }
 
 export const snakeSlice = createSlice({

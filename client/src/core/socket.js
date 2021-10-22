@@ -12,8 +12,14 @@ export const connect = () => {
   })
 }
 
-export const startGameSocket = (cb) => {
-  socket.emit('game:start', 'lol', (data) => {
+export const startGameSocket = (payload, cb) => {
+  socket.emit('game:start', payload, (data) => {
+    cb(data)
+  })
+}
+
+export const initMoveSocket = (payload, cb) => {
+  socket.emit('game:move', payload, (data) => {
     cb(data)
   })
 }

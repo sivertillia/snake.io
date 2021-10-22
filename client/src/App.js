@@ -1,24 +1,21 @@
-import './App.css';
-import { Canvas } from './component/Canvas'
-import { CANVAS_SIZE } from './core/constants'
-import { connect, startGameSocket } from './core/socket'
-import { useDispatch, useSelector } from 'react-redux'
-import { setSnake } from './store/snake/snakeSlice'
+import './App.css'
+import { Route, BrowserRouter as Router, Switch } from 'react-router-dom'
+import { Home } from './screens/Home'
+import { Game } from './screens/Game'
+
 function App() {
-  const dispatch = useDispatch()
-  const startGame = () => {
-    connect()
-    startGameSocket((data) => {
-      dispatch(setSnake(data))
-      console.log(data)
-    })
-  }
   return (
-    <>
-      <Canvas width={CANVAS_SIZE[0]} height={CANVAS_SIZE[1]} />
-      <button onClick={startGame}>Start Game</button>
-    </>
-  );
+    <Router>
+      <Switch>
+        <Route exact path="/">
+          <Home/>
+        </Route>
+        <Route exact path="/game">
+          <Game/>
+        </Route>
+      </Switch>
+    </Router>
+  )
 }
 
-export default App;
+export default App
