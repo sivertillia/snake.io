@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { DIRECTIONS, SCALE, SPEED } from '../../../core/constants'
+import { DIRECTIONS, DIRECTIONS_FUNC, SCALE, SPEED } from '../../../core/constants'
 import { useDispatch, useSelector } from 'react-redux'
 import { useInterval } from '../../../core/hook'
 import { setSnake } from '../../../store/snake/snakeSlice'
@@ -9,7 +9,7 @@ import { initMoveSocket } from '../../../core/socket'
 export const Canvas = ({ width, height }) => {
 
   const snake = useSelector((state) => state.snakeState.snake)
-  const [dir, setDir] = useState([])
+  const [dir, setDir] = useState('')
   const dispatch = useDispatch()
 
   useInterval(() => gameLoop(), snake.speed)
@@ -30,7 +30,9 @@ export const Canvas = ({ width, height }) => {
       snakeHeadX === snakeBodyX ? 0 : snakeHeadX - snakeBodyX,
       snakeHeadY === snakeBodyY ? 0 : snakeHeadY - snakeBodyY,
     ]
-    setDir(startDir)
+    const dirText = DIRECTIONS_FUNC(startDir)
+    setDir(dirText)
+    console.log(dirText)
     canvas.focus()
   }, [snake])
 
@@ -71,14 +73,11 @@ export const Canvas = ({ width, height }) => {
   }
 
   const gameLoop = () => {
-    const snakeCopy = JSON.parse(JSON.stringify(snake.position))
-    const newSnakeHead = {x: snakeCopy[0]?.x + dir[0], y: snakeCopy[0]?.y + dir[1]}
-    snakeCopy.unshift(newSnakeHead)
-    snakeCopy.pop()
-    initMoveSocket({...snake, position: snakeCopy}, (data) => {
-      console.log(data.status)
+    initMoveSocket({id: snake.id, dir: dir}, (data) => {
+      console.log(data)
       if (data.status) {
-        dispatch(setSnake({ ...snake, position: snakeCopy }))
+        console.log(data)
+        dispatch(setSnake({ ...snake, position: data.snake }))
         return
       }
       alert('Game Over')

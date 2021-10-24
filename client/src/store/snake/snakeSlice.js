@@ -6,6 +6,7 @@ const initialState = {
     speed: null,
     theme: {},
     username: '',
+    id: '',
   },
 }
 

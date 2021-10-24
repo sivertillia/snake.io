@@ -20,8 +20,19 @@ export const snake = {
 
 
 export const DIRECTIONS = {
-  38: [0, -1], // up
-  40: [0, 1], // down
-  37: [-1, 0], // left
-  39: [1, 0] // right
+  38: 'up', // up
+  40: 'down', // down
+  37: 'left', // left
+  39: 'right' // right
 };
+
+export const DIRECTIONS_FUNC = (array) => {
+  if (arraysAreEqual(array, [0, -1])) return 'up'
+  if (arraysAreEqual(array, [0, 1])) return 'down'
+  if (arraysAreEqual(array, [-1, 0])) return 'left'
+  if (arraysAreEqual(array, [1, 0])) return 'right'
+};
+
+function arraysAreEqual(arr1, arr2) {
+  return arr1.length === arr2.length && arr1.every((_, i) => arr1[i] === arr2[i]);
+}
