@@ -3,7 +3,8 @@ import io from 'socket.io-client'
 let socket
 
 export const connect = () => {
-  socket = io('http://localhost:8000/')
+  // socket = io('http://localhost:8000/')
+  socket = io('http://192.168.1.143:8000/')
   socket.on('connect', () => {
     console.log('Connect Socket')
   })
@@ -20,6 +21,12 @@ export const startGameSocket = (payload, cb) => {
 
 export const initMoveSocket = (payload, cb) => {
   socket.emit('game:move', payload, (data) => {
+    cb(data)
+  })
+}
+
+export const getSnakes = (cb) => {
+  socket.on('snakes:get', (data) => {
     cb(data)
   })
 }
