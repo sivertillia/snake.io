@@ -1,6 +1,3 @@
-export const sizePlot = 30
-export const sizeSnake = 2 // min 2
-export const maxApple = 5
 export const DIRECTIONS = {
   'up': [0, -1], // up
   'down': [0, 1], // down

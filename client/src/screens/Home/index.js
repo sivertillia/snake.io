@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 import bgPicture from '../../assets/bg_home.jpg'
-import { Button, FormControl, InputLabel, MenuItem, NativeSelect, Select, styled, TextField } from '@mui/material'
+import { Button, styled, TextField } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import { purple } from '@mui/material/colors'
 import { useDispatch, useSelector } from 'react-redux'
-import { setTheme } from '../../store/snake/themeSlice'
 import { connect, startGameSocket } from '../../core/socket'
 import { setSnake } from '../../store/snake/snakeSlice'
 import { useHistory } from 'react-router-dom'
-import { themes } from '../../core/constants'
+import { useColor, ColorPicker } from 'react-color-palette'
+import "react-color-palette/lib/css/styles.css"
 
 const ColorButton = styled(Button)(({ theme }) => ({
   color: theme.palette.getContrastText(purple[500]),
@@ -16,31 +16,41 @@ const ColorButton = styled(Button)(({ theme }) => ({
   '&:hover': {
     backgroundColor: purple[700],
   },
-}));
+}))
 
 
 export const Home = () => {
   const usernameLocalStorage = localStorage.getItem('username')
   const dispatch = useDispatch()
   const history = useHistory()
-  const theme = useSelector((state) => state.themeState.theme)
-  const [username, setStateUsername] = useState(usernameLocalStorage ? usernameLocalStorage : '')
+  const [username, setStateUsername] = useState(usernameLocalStorage ? usernameLocalStorage : 'Player')
+  const colorHeadStorage = localStorage.getItem('colorHead')
+  const colorBodyStorage = localStorage.getItem('colorBody')
+  const [colorHead, setColorHead] = useColor('hex', colorHeadStorage ? colorHeadStorage : '#121212')
+  const [colorBody, setColorBody] = useColor('hex', colorBodyStorage ? colorBodyStorage : '#121212')
+  const [openColorHead , setOpenColorHead] = useState(false)
+  const [openColorBody , setOpenColorBody] = useState(false)
   const classes = useStyles()
-
-
-  const handleTheme = (e) => {
-    dispatch(setTheme(e.target.value))
-  }
 
   const handleUsername = (e) => {
     setStateUsername(e.target.value)
-    // dispatch(setTheme({head: 'red', body: 'yellow'}))
+  }
+
+  const handleClickHead = () => {
+    setOpenColorHead(!openColorHead)
+    setOpenColorBody(false)
+  }
+  const handleClickBody = () => {
+    setOpenColorBody(!openColorBody)
+    setOpenColorHead(false)
   }
 
   const clickStartGame = (e) => {
     localStorage.setItem('username', username)
+    localStorage.setItem('colorHead', colorHead.hex)
+    localStorage.setItem('colorBody', colorBody.hex)
     connect()
-    startGameSocket({theme: theme, username: username, room: 'random'},(data) => {
+    startGameSocket({ theme: {head: colorHead.hex, body: colorBody.hex}, username: username, room: 'random' }, (data) => {
       console.log(data)
       dispatch(setSnake(data))
       history.push('/game')
@@ -48,25 +58,23 @@ export const Home = () => {
   }
 
   return (
-    <div className={classes.container}>
-      <div className={classes.box}>
-        <TextField label="Username" size="large" onChange={handleUsername} value={username} className={classes.inputUsername} />
-        <FormControl sx={{ minWidth: 200 }} size="large">
-          <InputLabel id="demo-simple-select-label">Theme</InputLabel>
-          <Select
-            defaultValue={theme}
-            value={theme}
-            // defaultValue={themes[0].value}
-            label="Theme"
-            onChange={handleTheme}
-          >
-            {themes.map((item, idx) => <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>)}
-
-          </Select>
-        </FormControl>
-        <ColorButton onClick={clickStartGame} size="large" variant="contained" >Start Game</ColorButton>
+      <div className={classes.container}>
+        <div>
+          <div className={classes.snake}>
+            <div onClick={handleClickHead} className={classes.snakeHead} style={{background: colorHead.hex}} />
+            <div onClick={handleClickBody} className={classes.snakeBody} style={{background: colorBody.hex}} />
+          </div>
+        </div>
+        <div className={classes.box}>
+          <TextField label="Username" size="large" onChange={handleUsername} value={username}
+                     className={classes.inputUsername}/>
+          <ColorButton onClick={clickStartGame} size="large" autoFocus variant="contained">Start Game</ColorButton>
+        </div>
+        <div className={classes.boxRGB}>
+          {openColorHead ? <ColorPicker width={247} height={150} color={colorHead} onChange={setColorHead} hideHSV dark/> : null}
+          {openColorBody ? <ColorPicker width={247} height={150} color={colorBody} onChange={setColorBody} hideHSV dark/> : null}
+        </div>
       </div>
-    </div>
   )
 }
 
@@ -76,6 +84,9 @@ const useStyles = makeStyles(() => ({
     height: '100vh',
     display: 'flex',
     alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    position: 'relative',
   },
   box: {
     display: 'flex',
@@ -85,6 +96,7 @@ const useStyles = makeStyles(() => ({
     justifyContent: 'space-between',
     marginLeft: 'auto',
     marginRight: 'auto',
+    marginTop: '50px'
   },
   buttonStart: {
     backgroundColor: 'red!important',
@@ -95,6 +107,23 @@ const useStyles = makeStyles(() => ({
     m: 1,
     minWidth: 200,
   },
+  snake: {
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+  },
+  snakeHead: {
+    width: 50,
+    height: 50,
+  },
+  snakeBody: {
+    width: 150,
+    height: 50,
+  },
+  boxRGB: {
+    position: 'absolute',
+    right: '20%',
+  }
 }))
 
 

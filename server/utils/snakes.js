@@ -1,8 +1,4 @@
-import { maxApple } from './const'
-import { generateApple } from './utils'
-
 let SNAKES = []
-let APPLES = []
 
 
 export const addSnake = (data) => {
@@ -10,9 +6,14 @@ export const addSnake = (data) => {
   return data
 }
 
-export const setSnake = (id, data) => {
+export const setSnake = (id, data, appleEat) => {
+  let tempAppleEat = appleEat
   SNAKES = SNAKES.map(snake => {
-    if (snake?.id === id) return { ...snake, position: data }
+    if (snake?.id === id) {
+      if (tempAppleEat < 0) tempAppleEat = 0
+      console.log(tempAppleEat)
+      return { ...snake, position: data, appleEat: tempAppleEat }
+    }
     return snake
   })
 }
@@ -39,23 +40,3 @@ export const checkXY = (checkElement) => {
   return array.some(e => e.x === checkElement.x && e.y === checkElement.y)
 }
 
-export const checkApple = (checkElement) => {
-  return APPLES.some(e => e.x === checkElement.x && e.y === checkElement.y)
-}
-
-export const createApple = () => {
-  for (let i = maxApple; APPLES.length < i;) {
-    APPLES.push(generateApple())
-    console.log(APPLES.length)
-    console.log('1111111111111111111111111111111111111111111111111', APPLES)
-  }
-  return APPLES
-}
-
-export const checkEatApple = (checkElement) => {
-  if (checkApple(checkElement)) {
-    APPLES = APPLES.filter((apple) => (apple.x !== checkElement.x && apple.y !== checkElement.y))
-    return true
-  }
-  return false
-}
