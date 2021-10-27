@@ -1,4 +1,4 @@
-import { SIZE_MAP, SIZE_SNAKE, SPEED } from '../configGame'
+import { SIZE_MAP, SIZE_SNAKE } from '../configGame'
 
 export const generateSnake = () => {
   let body = []
@@ -32,6 +32,6 @@ export const generateSnake = () => {
     break;
   }
 
-  return { position: body, speed: SPEED }
+  return { position: body }
 }
 

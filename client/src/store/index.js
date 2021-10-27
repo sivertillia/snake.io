@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import snakeReducer from './snake/snakeSlice'
-import themeReducer from './snake/themeSlice'
+import mapReducer from './snake/mapSlice'
 import rivalSnakesReducer from './snake/rivalSnakesSlice'
 
 export const store = configureStore({
   reducer: {
     snakeState: snakeReducer,
-    themeState: themeReducer,
+    mapState: mapReducer,
     rivalSnakesState: rivalSnakesReducer,
   },
 })

@@ -14,7 +14,6 @@ export const GameOver = ({ open }) => {
   return (
     <Modal
       open={open}
-      onClose={false}
       disableAutoFocus
     >
       <Box sx={style}>

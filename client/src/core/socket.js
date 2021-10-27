@@ -2,11 +2,12 @@ import io from 'socket.io-client'
 
 let socket
 
-export const connect = () => {
+export const connect = (callback) => {
   // socket = io('http://localhost:8000/')
   socket = io('http://192.168.1.143:8000/')
   socket.on('connect', () => {
     console.log('Connect Socket')
+    callback()
   })
   socket.on('disconnect', () => {
     console.log('Disconnect Socket')

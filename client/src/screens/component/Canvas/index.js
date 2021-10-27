@@ -8,9 +8,6 @@ export const Canvas = ({ width, height, canvasRef, moveSnake }) => {
 }
 
 const styleCanvas = {
-  border: 1,
-  borderColor: 'black',
-  borderStyle: 'solid',
   marginLeft: 'auto',
   marginRight: 'auto',
   display: 'block',

@@ -1,4 +1,5 @@
 let SNAKES = []
+let MAP = []
 
 
 export const addSnake = (data) => {

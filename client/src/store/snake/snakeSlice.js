@@ -7,7 +7,6 @@ const initialState = {
     theme: {},
     username: '',
     id: '',
-    apples: [],
   },
 }
 

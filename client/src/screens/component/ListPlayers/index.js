@@ -14,18 +14,21 @@ export const ListPlayers = ({  }) => {
   }, [snake])
 
   return (
-    <div className={classes.box}>
-      {snakesAll.map((sn, index) => {
-        return (
-          <div key={sn.id} className={classes.line}>
-            <div>{index+1}.</div>
-            <div className={snake.id === sn.id ? classes.lineMyPlayer : classes.linePlayer}>
-              <div>{sn.username}</div>
-              <div>{sn.position.length}</div>
+    <div className={classes.block}>
+      <div>x: {snake.position[0].x} y: {snake.position[0].y}</div>
+      <div className={classes.box}>
+        {snakesAll.map((sn, index) => {
+          return (
+            <div key={sn.id} className={classes.line}>
+              <div>{index+1}.</div>
+              <div className={snake.id === sn.id ? classes.lineMyPlayer : classes.linePlayer}>
+                <div>{sn.username}</div>
+                <div>{sn.position.length}</div>
+              </div>
             </div>
-          </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -34,13 +37,15 @@ const useStyles = makeStyles(() => ({
   box: {
     display: 'flex',
     flexDirection: 'column',
-    position: 'absolute',
     width: '150px',
     height: '300px',
     border: 1,
     borderColor: 'black',
     borderStyle: 'solid',
     backgroundColor: 'rgba(255,255,255,0.70)',
+  },
+  block: {
+    position: 'absolute',
     top: 5,
     right: 150,
   },
