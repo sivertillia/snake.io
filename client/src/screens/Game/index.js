@@ -2,8 +2,7 @@ import { Canvas } from '../component/Canvas'
 import { CANVAS_SIZE, DIRECTIONS, DIRECTIONS_FUNC } from '../../core/constants'
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useRef, useState } from 'react'
-import { useInterval } from '../../core/hook'
-import { initMoveSocket } from '../../core/socket'
+import { getSnakeDataSocket, initMoveSocket } from '../../core/socket'
 import { setSnake } from '../../store/snake/snakeSlice'
 import { setRivalSnakes } from '../../store/snake/rivalSnakesSlice'
 import { ListPlayers } from '../component/ListPlayers'
@@ -15,17 +14,36 @@ export const Game = () => {
   const rivalSnakes = useSelector((state) => state.rivalSnakesState.snakes)
   const MAP_SIZE = useSelector((state) => state.mapState.MAP_SIZE)
   const apples = useSelector((state) => state.mapState.apples)
-  const [dir, setDir] = useState('')
   const [gameOver, setStateGameOver] = useState(false)
   const dispatch = useDispatch()
   const [sizeCamera, setSizeCamera] = useState(30)
-  const [headSnake, setHead] = useState({x: 50, y: 50})
+  const [headSnake, setHead] = useState({ x: 50, y: 50 })
 
-  useInterval(() => gameLoop(), snake.speed)
 
   const canvasRef = useRef(null)
 
-  useEffect(async () => {
+  useEffect(() => {
+    getSnakeDataSocket((data, id) => {
+      const rivalSnakes = []
+      let mySnake
+      data.snakes.forEach((snake) => {
+        if (snake.id === id) return mySnake = snake
+        rivalSnakes.push(snake)
+      })
+      if (!mySnake) {
+        const score = localStorage.getItem('score')
+        if (score < snake.position.length) localStorage.setItem('score', snake.position.length)
+        setStateGameOver(true)
+        return
+      }
+      dispatch(setRivalSnakes(rivalSnakes))
+      dispatch(setSnake(mySnake))
+      setHead(mySnake.position[0])
+      dispatch(setApples(data.apples))
+    })
+  }, [])
+
+  useEffect(() => {
     const canvas = canvasRef.current
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
@@ -38,32 +56,14 @@ export const Game = () => {
     renderRivalSnakes(ctx)
     renderSnake(ctx)
     renderApple(ctx)
-    const snakeHeadX = snake.position[0]?.x
-    const snakeHeadY = snake.position[0]?.y
-    const snakeBodyX = snake.position[1]?.x
-    const snakeBodyY = snake.position[1]?.y
-    const dirText = DIRECTIONS_FUNC(
-      [
-        snakeHeadX === snakeBodyX ? 0 : snakeHeadX - snakeBodyX,
-        snakeHeadY === snakeBodyY ? 0 : snakeHeadY - snakeBodyY,
-      ]
-    )
-    setDir(dirText)
     canvas.focus()
   }, [snake])
 
   const moveSnake = ({ keyCode }) => {
-    if (keyCode >= 37 && keyCode <= 40 && DIRECTIONS[keyCode] !== dir) {
-      if (
-        (dir === 'up' && DIRECTIONS[keyCode] === 'down') ||
-        (dir === 'down' && DIRECTIONS[keyCode] === 'up') ||
-        (dir === 'left' && DIRECTIONS[keyCode] === 'right') ||
-        (dir === 'right' && DIRECTIONS[keyCode] === 'left')
-      ) return
-      setDir(DIRECTIONS[keyCode])
+    if (keyCode >= 37 && keyCode <= 40) {
+      initMoveSocket({ dir: DIRECTIONS[keyCode] })
     }
   }
-
 
   const renderSnake = (ctx) => {
     ctx.fillStyle = snake.theme?.head
@@ -103,7 +103,7 @@ export const Game = () => {
       ctx.fillRect(x, y, 1, 1)
       ctx.fillStyle = colorText
       ctx.font = 'bold 4% sans-serif'
-      ctx.fillText(`+${size}`, x+0.1, y+0.7)
+      ctx.fillText(`+${size}`, x + 0.1, y + 0.7)
     })
   }
 
@@ -114,15 +114,15 @@ export const Game = () => {
       ctx.fillStyle = color2
       ctx.fillRect(i, -1, 1, 1)
       ctx.fillRect(i, -2, 1, 1)
-      ctx.fillRect(i, MAP_SIZE+1, 1, 1)
-      ctx.fillRect(i, MAP_SIZE+2, 1, 1)
+      ctx.fillRect(i, MAP_SIZE + 1, 1, 1)
+      ctx.fillRect(i, MAP_SIZE + 2, 1, 1)
     }
     for (let i = 0; MAP_SIZE >= i; i++) {
       ctx.fillStyle = color2
       ctx.fillRect(-1, i, 1, 1)
       ctx.fillRect(-2, i, 1, 1)
-      ctx.fillRect(MAP_SIZE+1, i, 1, 1)
-      ctx.fillRect(MAP_SIZE+2, i, 1, 1)
+      ctx.fillRect(MAP_SIZE + 1, i, 1, 1)
+      ctx.fillRect(MAP_SIZE + 2, i, 1, 1)
     }
     // for (let i = 0; MAP_SIZE >= i; i++) {
     //   for (let k = 0; MAP_SIZE >= k; k++) {
@@ -147,40 +147,23 @@ export const Game = () => {
     // }
   }
 
-  const gameLoop = () => {
-    initMoveSocket({ dir: dir }, (data) => {
-
-      if (data.status) {
-        dispatch(setApples(data.apples))
-        dispatch(setSnake({ ...snake, position: data.snake }))
-        dispatch(setRivalSnakes(data.rivalSnakes))
-        // if (data.snake.length > 15) setSizeCamera(25)
-        setHead(data.snake[0])
-        return
-      }
-      const score = localStorage.getItem('score')
-      if (score < snake.position.length) localStorage.setItem('score', snake.position.length)
-      setStateGameOver(true)
-    })
-  }
-
   const getCenterSnake = () => {
-    let xLeftTop = -headSnake.x + (window.innerWidth/2) / sizeCamera-2
-    let yLeftTop = -headSnake.y + (window.innerHeight/2) / sizeCamera
+    let xLeftTop = -headSnake.x + (window.innerWidth / 2) / sizeCamera - 2
+    let yLeftTop = -headSnake.y + (window.innerHeight / 2) / sizeCamera
     if (xLeftTop > 2) xLeftTop = 2
     if (yLeftTop > 2) yLeftTop = 2
-    let xRightTop = xLeftTop-(window.innerWidth/sizeCamera)
-    let yRightBottom = yLeftTop-(window.innerHeight/sizeCamera)
-    if (-xRightTop > MAP_SIZE + 2) xLeftTop = (window.innerWidth/sizeCamera-3) - MAP_SIZE
-    if (-yRightBottom > MAP_SIZE + 2) yLeftTop = (window.innerHeight/sizeCamera-3) - MAP_SIZE
-    return {x: xLeftTop, y: yLeftTop}
+    let xRightTop = xLeftTop - (window.innerWidth / sizeCamera)
+    let yRightBottom = yLeftTop - (window.innerHeight / sizeCamera)
+    if (-xRightTop > MAP_SIZE + 2) xLeftTop = (window.innerWidth / sizeCamera - 3) - MAP_SIZE
+    if (-yRightBottom > MAP_SIZE + 2) yLeftTop = (window.innerHeight / sizeCamera - 3) - MAP_SIZE
+    return { x: xLeftTop, y: yLeftTop }
   }
 
   return (
     <>
-      <Canvas width={CANVAS_SIZE[0]} height={CANVAS_SIZE[1]} canvasRef={canvasRef} moveSnake={moveSnake} />
-      <ListPlayers />
-      <GameOver open={gameOver} />
+      <Canvas width={CANVAS_SIZE[0]} height={CANVAS_SIZE[1]} canvasRef={canvasRef} moveSnake={moveSnake}/>
+      <ListPlayers/>
+      <GameOver open={gameOver}/>
     </>
   )
 }

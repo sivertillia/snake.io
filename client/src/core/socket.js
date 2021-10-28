@@ -20,14 +20,12 @@ export const startGameSocket = (payload, cb) => {
   })
 }
 
-export const initMoveSocket = (payload, cb) => {
-  socket.emit('game:move', payload, (data) => {
-    cb(data)
-  })
+export const initMoveSocket = (payload) => {
+  socket.emit('game:move', payload)
 }
 
-export const getSnakes = (cb) => {
+export const getSnakeDataSocket = (cb) => {
   socket.on('snakes:get', (data) => {
-    cb(data)
+    cb(data, socket.id)
   })
 }

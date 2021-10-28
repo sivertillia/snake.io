@@ -12,7 +12,6 @@ export const setSnake = (id, data, appleEat) => {
   SNAKES = SNAKES.map(snake => {
     if (snake?.id === id) {
       if (tempAppleEat < 0) tempAppleEat = 0
-      console.log(tempAppleEat)
       return { ...snake, position: data, appleEat: tempAppleEat }
     }
     return snake
@@ -35,9 +34,24 @@ export const allSnakes = (id) => {
   return SNAKES.filter(snake => snake?.id !== id)
 }
 
+export const getAllSnakes = () => {
+  return SNAKES
+}
+
 export const checkXY = (checkElement) => {
   const array = []
   SNAKES.forEach(snake => array.push(...snake.position))
   return array.some(e => e.x === checkElement.x && e.y === checkElement.y)
 }
 
+export const setSnakeDir = (id, dir) => {
+  console.log('start Array')
+  SNAKES = SNAKES.map(snake => {
+    console.log('start SNAKE', snake)
+    if (snake?.id === id) {
+      console.log('true')
+      return { ...snake, dir: dir, }
+    }
+    return snake
+  })
+}
